@@ -1,0 +1,7 @@
+node_modules
+scripts/dev/*.js
+*.html
+npm
+docs
+*.min.js
+dist

@@ -1,0 +1,7 @@
+pnpm-debug.log*
+node_modules
+dist
+npm
+packages
+.DS_Store
+*.min.js
