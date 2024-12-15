@@ -413,7 +413,7 @@ declare class Disk implements Omit<IDiskBankEnd, "init" | "traverseContent"> {
 	private init;
 	fmtPath(path: string): string;
 	size(path?: string): Promise<number>;
-	cd(path: string): void;
+	cd(path: string): boolean;
 	pwd(): string;
 	copy(files: string | string[]): Promise<boolean>;
 	copySync(files: string | string[]): Promise<boolean>;
@@ -468,6 +468,7 @@ declare class Disk implements Omit<IDiskBankEnd, "init" | "traverseContent"> {
 	watch(...args: Parameters<Watch["watch"]>): FSWatcher;
 	watchFile(...args: Parameters<Watch["watchFile"]>): void;
 	unwatchFile(...args: Parameters<Watch["unwatchFile"]>): void;
+	isDir(path: string): boolean;
 }
 declare class CMD {
 	static instance: CMD;
@@ -475,7 +476,7 @@ declare class CMD {
 	ready: Promise<void>;
 	constructor();
 	ls(path?: string): string[];
-	cd(path: string): void;
+	cd(path: string): boolean;
 	pwd(): string;
 	touch(path: string): Promise<boolean>;
 	mkdir(path: string): Promise<boolean>;
@@ -488,7 +489,7 @@ declare class CMD {
 	less(path: string): string | null;
 	head(path: string, line: number): string;
 	tail(path: string, line: number): string;
-	grep(path: string, reg: string | RegExp): string[] | "";
+	grep(path: string, reg: string | RegExp): string[];
 	find(path: string, { name, type }?: {
 		name?: string | RegExp;
 		type?: IFileType;

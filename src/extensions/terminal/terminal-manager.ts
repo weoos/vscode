@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import {cmd, initWebNodejs} from '../../common/web-node';
 import {HistoryStack} from 'history-stack';
+import {CommandManager} from './command';
 
 
 const ready = initWebNodejs();
@@ -61,6 +62,7 @@ const ControlKey = {
     '\x1b[B': 'Down',
     '\x1b[D': 'Left',
     '\x1b[C': 'Right',
+    '	': 'Tab',
 
 } as const;
 
@@ -68,6 +70,7 @@ export class TerminalManager {
     name = 'WebOS';
     pwd = '';
     writeEmitter = new vscode.EventEmitter();
+    command: CommandManager;
     line = '';
     cursorIndex = 0;
     history = new HistoryStack<string>({max: 100});
@@ -76,9 +79,10 @@ export class TerminalManager {
         this.init();
         // @ts-ignore
         // terminal.show();
+        this.command = new CommandManager(this);
     }
 
-    private clear () {
+    clear () {
         const {writeEmitter} = this;
         writeEmitter.fire('\x1b[2J\x1b[3J\x1b[;H');
         writeEmitter.fire(`\r\n${this.pwd}`);
@@ -93,14 +97,24 @@ export class TerminalManager {
 
     private async onCommand (content: string) {
         if (content) {
-            console.log('onCommand', `data="${content}"`);
+
             this.history.push(content);
+
             if (content === 'clear') {
                 return this.clear();
             }
-            // todo
+
+
+            const result = await this.command.run(content);
+
+            this.writeEmptyLine();
+
+            this.writeLine(result);
+
+            console.log('onCommand', `data="${content}"`);
+        } else {
+            this.writeLine('');
         }
-        this.writeLine('');
     }
 
     writeLine (text: string, lines = 1) {
@@ -159,10 +173,7 @@ export class TerminalManager {
             count = this.cursorIndex;
         }
 
-
         this.line = this.line.substring(0, this.cursorIndex - count) + this.line.substring(this.cursorIndex);
-
-
         const offset = this.cursorMove(-count);
         const value = new Array(count + offset).fill('\x1b[P').join('');
         this.writeEmitter.fire(value);
@@ -239,6 +250,9 @@ export class TerminalManager {
                             this.cursorMove(1);
                         }
                         break;
+                    case 'Tab': {
+                        console.log('Tab');
+                    }; break;
                     default:
                         if (data[0] !== '[') {
                             fireData();

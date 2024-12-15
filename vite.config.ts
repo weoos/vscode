@@ -51,6 +51,9 @@ function geneDevConfig (): UserConfig {
     return {
         plugins: [],
         server: {
+            watch: {
+                disableGlobbing: true,
+            },
             hmr: false,
             host: '0.0.0.0',
             port: 5173,
