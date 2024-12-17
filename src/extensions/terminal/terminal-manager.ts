@@ -6,12 +6,11 @@
 
 
 import * as vscode from 'vscode';
-import {cmd, initWebNodejs} from '../../common/web-node';
+import {cmd, ready, splitPathInfo} from '../../common/web-node';
 import {HistoryStack} from 'history-stack';
 import {CommandManager} from './command';
+import {getMaxCommonHead} from '../../common/utils';
 
-
-const ready = initWebNodejs();
 
 // export function createPty () {
 //     const writeEmitter = new vscode.EventEmitter();
@@ -173,8 +172,9 @@ export class TerminalManager {
             count = this.cursorIndex;
         }
 
-        this.line = this.line.substring(0, this.cursorIndex - count) + this.line.substring(this.cursorIndex);
+        const index = this.cursorIndex;
         const offset = this.cursorMove(-count);
+        this.line = this.line.substring(0, index - count) + this.line.substring(index);
         const value = new Array(count + offset).fill('\x1b[P').join('');
         this.writeEmitter.fire(value);
         console.log(`after delete: line=${this.line} offset=${offset} count=${count}`);
@@ -190,94 +190,110 @@ export class TerminalManager {
 
         this.switchPWD();
 
+        // @ts-ignore
+        vscode.window.createTerminal({
+            name: this.name,
+            pty: {
+                onDidWrite: this.writeEmitter.event,
+                open: () => this.writeLine(`Welcome to VSCode of WebOS!`, 2),
+                close: () => { /* noop*/ },
+                handleInput: this.onHandleTerminalData.bind(this),
+            }
+        });
+    }
+
+    async onHandleTerminalData (data: string) {
+
         const {writeEmitter} = this;
-        const pty = {
-            onDidWrite: writeEmitter.event,
-            open: () => this.writeLine(`Welcome to WebOS!`, 2),
-            close: () => { /* noop*/ },
-            handleInput: async (data: string) => {
-                console.log('handleInput', `data="${data}"`, `line="${this.line}" cursorIndex=${this.cursorIndex}`);
-                const controlKey = ControlKey[data as keyof typeof ControlKey] || '';
+        console.log('handleInput', `data="${data}"`, `line="${this.line}" cursorIndex=${this.cursorIndex}`);
+        const controlKey = ControlKey[data as keyof typeof ControlKey] || '';
 
-                // todo 中文 光标问题
-                const fireData = () => {
-                    const newData = data + this.line.substring(this.cursorIndex);
-                    this.line = this.line.substring(0, this.cursorIndex) + newData;
-                    writeEmitter.fire(newData);
-                    const back = this.line.length - data.length - this.cursorIndex;
-                    this.cursorIndex += newData.length;
-                    console.log(`fireData newDate=${newData} ${newData.length} back=${back} cursorIndex=${this.cursorIndex}`);
-                    this.cursorMove(-back);
-                };
-
-                switch (controlKey) {
-                    case 'Enter':
-                        await this.onCommand(this.line);
-                        this.clearLineInfo();
-                        break;
-                    case 'Backspace':
-                        this.delete(1);
-                        break;
-                    case 'Up':
-                        // ! 如果首次翻看历史记录，会把当前内容加入历史记录
-                        if (!this.history.isActive) {
-                            this.history.push(this.line);
-                            this.history.back();
-                        }
-                        if (this.history.canBack()) {
-                            const value = this.history.back();
-                            console.log('history back', value);
-                            this.replaceCurrentLine(value);
-                        } else {
-                            // 如果翻到第一条了 加一个光标移到最前面
-                            this.cursorMoveToHead();
-                        }
-                        break;
-                    case 'Down':
-                        if (this.history.canForward()) {
-                            const value = this.history.forward();
-                            console.log('history forward', value);
-                            this.replaceCurrentLine(value);
-                        }
-                        break;
-                    case 'Left':
-                        if (this.cursorIndex > 0) {
-                            this.cursorMove(-1);
-                        }
-                        break;
-                    case 'Right':
-                        if (this.cursorIndex < this.line.length) {
-                            this.cursorMove(1);
-                        }
-                        break;
-                    case 'Tab': {
-                        console.log('Tab');
-                    }; break;
-                    default:
-                        if (data[0] !== '[') {
-                            fireData();
-                            // ! 对最新的当前操作的历史记录可以更新
-                            if (this.history.isLatest) {
-                                this.history.replace(this.line);
-                            }
-                        }
-                        break;
-                }
-                console.log('handleInput after', `data="${data}"`, `line="${this.line}" cursorIndex=${this.cursorIndex}`);
-            },
+        // todo 中文 光标问题
+        const fireData = () => {
+            const newData = data + this.line.substring(this.cursorIndex);
+            this.line = this.line.substring(0, this.cursorIndex) + newData;
+            writeEmitter.fire(newData);
+            const back = this.line.length - data.length - this.cursorIndex;
+            this.cursorIndex += newData.length;
+            console.log(`fireData newDate=${newData} ${newData.length} back=${back} cursorIndex=${this.cursorIndex}`);
+            this.cursorMove(-back);
         };
 
-        // @ts-ignore
-        const terminal = vscode.window.createTerminal({
-            name: this.name,
-            pty,
-        });
+        switch (controlKey) {
+            case 'Enter':
+                await this.onCommand(this.line);
+                this.clearLineInfo();
+                break;
+            case 'Backspace': this.delete(1); break;
+            case 'Up':
+                // ! 如果首次翻看历史记录，会把当前内容加入历史记录
+                if (!this.history.isActive) {
+                    this.history.push(this.line);
+                    this.history.back();
+                }
+                if (this.history.canBack()) {
+                    const value = this.history.back();
+                    console.log('history back', value);
+                    this.replaceCurrentLine(value);
+                } else {
+                    // 如果翻到第一条了 加一个光标移到最前面
+                    this.cursorMoveToHead();
+                }
+                break;
+            case 'Down':
+                if (this.history.canForward()) {
+                    const value = this.history.forward();
+                    console.log('history forward', value);
+                    this.replaceCurrentLine(value);
+                }
+                break;
+            case 'Left':
+                if (this.cursorIndex > 0) this.cursorMove(-1);
+                break;
+            case 'Right':
+                if (this.cursorIndex < this.line.length) this.cursorMove(1);
+                break;
+            case 'Tab':
+                const v = this.onTab();
+                if (v) {
+                    data = v;
+                    fireData();
+                }
+                break;
+            default:
+                if (data[0] !== '[') {
+                    fireData();
+                    // ! 对最新的当前操作的历史记录可以更新
+                    if (this.history.isLatest) {
+                        this.history.replace(this.line);
+                    }
+                }
+                break;
+        }
+        console.log('handleInput after', `data="${data}"`, `line="${this.line}" cursorIndex=${this.cursorIndex}`);
+    }
+
+    onTab () {
+        let value = this.line.substring(0, this.cursorIndex);
+        const index = value.lastIndexOf(' ');
+        value = value.substring(index + 1);
+
+        const {parent, name} = splitPathInfo(value);
+        const files = cmd.ls(parent) || [];
+
+        const results = files.filter(item => item.startsWith(name));
+
+        const common = getMaxCommonHead(results, name.length);
+        console.log(`tab="${value}" parent="${parent}", name="${name}" common="${common}"`);
+
+        return common.replace(name, '');
     }
 
     // clear(){
     // 	this.writeEmitter.fire('\x1b[2J\x1b[3J\x1b[;H');
     // }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function colorText (text) {
     let output = '';
     let colorIndex = 1;

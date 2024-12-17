@@ -11,6 +11,7 @@ import { EventEmitter } from 'events';
 import * as Http from 'http-browserify';
 import * as Https from 'https-browserify';
 import * as ConsoleAll from 'node:console';
+import * as FSAll from 'node:fs';
 import * as PathAll from 'node:path';
 import * as ProcessAll from 'node:process';
 import * as OsBrowserify from 'os-browserify';
@@ -32,6 +33,7 @@ export type NodePath = typeof PathAll;
 export type NodeConsole = typeof ConsoleAll;
 export type NodeStream = typeof StreamAll;
 export type NodeProcess = typeof ProcessAll;
+export type NodeFS = typeof FSAll;
 declare const modules: {
 	assert: typeof AssertAll;
 	zlib: typeof ZlibAll;
@@ -265,11 +267,14 @@ declare const modules: {
 declare const ModuleMap: {
 	stream: NodeStream;
 	events: typeof BaseModule.Events;
+	fs: NodeFS;
 } & typeof modules;
 export type IFileType = "empty" | "file" | "dir" | "link";
 export interface IFileStats {
 	size: number;
 	type: IFileType;
+	isDirectory(): boolean;
+	isFile(): boolean;
 }
 declare class StorageBackEnd {
 	static Supported(): boolean;
@@ -446,14 +451,12 @@ declare class Disk implements Omit<IDiskBankEnd, "init" | "traverseContent"> {
 	removeSync(path: string): boolean;
 	private _remove;
 	stat(path: string, recursive?: boolean): Promise<IFileStats>;
-	statSync(path: string, recursive?: boolean): {
-		size: number;
-		type: IFileType;
-	};
+	statSync(path: string, recursive?: boolean): IFileStats;
+	private _transStat;
 	exist(path: string): Promise<boolean>;
 	existSync(path: string): boolean;
 	ls(path?: string): Promise<string[] | null>;
-	lsSync(path?: string): string[];
+	lsSync(path?: string): string[] | null;
 	createDir(path: string, overwrite?: boolean): Promise<boolean>;
 	createDirSync(path: string, overwrite?: boolean): boolean;
 	private _createDir;
@@ -470,12 +473,22 @@ declare class Disk implements Omit<IDiskBankEnd, "init" | "traverseContent"> {
 	unwatchFile(...args: Parameters<Watch["unwatchFile"]>): void;
 	isDir(path: string): boolean;
 }
+export declare function splitPath(path: string): [
+	string[],
+	string
+];
+export declare function clearPath(path: string, tail?: boolean): string;
+export declare function splitPathInfo(path: string): {
+	path: string;
+	parent: string;
+	name: string;
+};
 declare class CMD {
 	static instance: CMD;
 	disk: Disk;
 	ready: Promise<void>;
 	constructor();
-	ls(path?: string): string[];
+	ls(path?: string): string[] | null;
 	cd(path: string): boolean;
 	pwd(): string;
 	touch(path: string): Promise<boolean>;
@@ -501,8 +514,9 @@ declare class CMD {
 }
 export type ModuleKey = keyof typeof ModuleMap;
 export declare const cmd: CMD;
-export declare function initWebNodejs(): Promise<void>;
 declare function require$1<T extends ModuleKey>(name: T): typeof ModuleMap[T];
+export declare function getDisk(): Disk;
+export declare let ready: Promise<void>;
 
 export {
 	require$1 as require,

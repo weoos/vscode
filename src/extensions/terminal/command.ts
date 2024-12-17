@@ -55,6 +55,8 @@ interface ICommand {
     options: Record<string, string>;
 }
 
+const NotDirText = 'Target is not a directory.';
+
 export class CommandManager {
 
     terminal: TerminalManager;
@@ -73,13 +75,13 @@ export class CommandManager {
         switch (command) {
             case 'clear': this.terminal.clear(); break;
 
-            case 'ls': result = cmd.ls(arg0).join(' '); break;
+            case 'ls': result = cmd.ls(arg0)?.join(' ') || NotDirText; break;
             case 'mkdir': await cmd.mkdir(arg0); break;
             case 'cd': {
                 if (cmd.cd(arg0)) {
                     this.terminal.switchPWD();
                 } else {
-                    result = 'Target is not a directory.';
+                    result = NotDirText;
                 }
             }; break;
             case 'pwd': result = cmd.pwd(); break;

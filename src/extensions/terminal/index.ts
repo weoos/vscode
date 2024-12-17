@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import {TerminalManager} from './terminal-manager';
 
 export function activate (context) {
+
     console.log('activated terminal', context);
 
     // console.log('TERMINAL EXT4', cmd.ls());
@@ -25,6 +26,7 @@ export function activate (context) {
             new TerminalManager();
         }
     });
+
     // // vscode.commands.registerCommand('')
     // vscode.window.onDidChangeTerminalState(e => {
     //     console.log(`Terminal state changed, name=${e ? e.name : 'undefined'}`);
@@ -39,15 +41,16 @@ export function activate (context) {
     // context.subscriptions.push(vscode.commands.registerCommand('extensionTerminalSample.clear', () => {
     // }));
 
-    // context.subscriptions.push(vscode.window.registerTerminalProfileProvider('webos.terminal', {
+    // context.subscriptions.push(vscode.window.registerTerminalProfileProvider('wos.terminal', {
     //     // @ts-ignore
     //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     //     provideTerminalProfile (token) {
+    //         debugger;
     // 	  	return {
     //             name: 'WebOS',
-    //             pty: createPty(),
+    //             pty: {},
     //         };
     //     }
-    //   }));
+    // }));
     new TerminalManager();
 }

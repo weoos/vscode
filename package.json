@@ -26,9 +26,10 @@
     "private": true,
     "version": "0.0.1",
     "scripts": {
-        "dev": "run-p _dev build:fs build:terminal",
-        "build:fs": "vite build -m=ext_fs",
+        "dev": "run-p build:fs build:terminal build:search _dev",
+        "build:fs": "vite build -m=ext_file-system",
         "build:terminal": "vite build -m=ext_terminal",
+        "build:search": "vite build -m=ext_search",
         "_dev": "vite --host",
         "lint": "eslint --fix",
         "build": "vite build -m=build",

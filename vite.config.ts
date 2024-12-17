@@ -20,13 +20,23 @@ export default defineConfig(({mode}) => {
 
     const isDev = !['build', 'npm'].includes(mode);
 
+
     const map = {
         'development': geneDevConfig,
         'build': geneBuildAppConfig,
         'npm': geneBuildConfig,
-        'ext_fs': () => geneBuildExtConfig('file-system'),
-        'ext_terminal': () => geneBuildExtConfig('terminal'),
     };
+
+    let fn = map[mode];
+
+    if (!fn) {
+        if (mode.startsWith('ext_')) {
+            fn = () => geneBuildExtConfig(mode.slice(4));
+        } else {
+            throw new Error(`Unknown mode: ${mode}`);
+        }
+    }
+
     console.log('defineConfig', mode, isDev);
 
     return {
@@ -37,7 +47,7 @@ export default defineConfig(({mode}) => {
             __VERSION__: `"${pubVersion}"`,
             __WIN__: 'window',
         },
-        ...map[mode]()
+        ...fn()
     };
 });
 function geneBuildAppConfig () {

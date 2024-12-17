@@ -1,9 +1,9 @@
 {
-	"name": "vscode-web-wosfs",
-	"displayName": "vscode-web-wosfs",
+	"name": "vscode-web-search",
+	"displayName": "vscode-web-search",
 	"description": "An example usage of the extension fs API",
 	"version": "0.0.1",
-	"publisher": "vscode-web-wosfs",
+	"publisher": "vscode-web-search",
 	"private": true,
 	"license": "MIT",
 	"repository": {
@@ -17,17 +17,11 @@
 		"Other"
 	],
     "activationEvents": [
-		"onFileSystem:wosfs"
+		"onSearch:scheme"
 	],
 	"browser": "./dist/bundle.min.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "wosfs.workspaceInit",
-				"title": "Setup Workspace",
-				"category": "WebosFS"
-			}
-		]
+		"commands": []
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
