@@ -11,17 +11,7 @@
 			"itemUrl": "https://open-vsx.org/vscode/item",
 			"resourceUrlTemplate":
 			"https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}"
-		},
-		"extensionEnabledApiProposals": {
-			"vscode.vscode-wosfs": [
-				"fileSearchProvider",
-				"textSearchProvider"
-			]
 		}
-	},
-	"folderUri": {
-	  "scheme": "wosfs",
-	  "path": "/System"
 	},
 	"additionalBuiltinExtensions": [
 		{
@@ -35,6 +25,10 @@
 		{
 			"scheme": "http",
 			"path": "/src/extensions/search/package"
+		},
+		{
+			"scheme": "http",
+			"path": "/src/extensions/jsbox/package"
 		}
 	]
   }

@@ -5,52 +5,13 @@
  */
 'use strict';
 
+import {Messenger} from '../../common/messenger/messenger';
 import * as vscode from 'vscode';
-import {TerminalManager} from './terminal-manager';
 
-export function activate (context) {
-
-    console.log('activated terminal', context);
-
-    // console.log('TERMINAL EXT4', cmd.ls());
-    // vscode.window.onDidOpenTerminal(terminal => {
-    //     console.log('Terminal opened. Total count: ' + (vscode.window).terminals.length);
-    // });
-    // vscode.window.onDidCloseTerminal((terminal) => {
-    //     vscode.window.showInformationMessage(`onDidOpenTerminal, name: ${terminal.name}`);
-    // });
-    // vscode.window.onDidChangeActiveTerminal
-    vscode.window.onDidChangeActiveTerminal(e => {
-        console.log(`Active terminal changed, name=${e ? e.name : 'undefined'}`);
-        if (vscode.window.terminals.length === 0) {
-            new TerminalManager();
-        }
+export async function activate (context: vscode.ExtensionContext) {
+    const msg = new Messenger('term-ext');
+    const disposable = vscode.commands.registerCommand('workbench.action.terminal.clear', () => {
+        msg.emit('clear-terminal');
     });
-
-    // // vscode.commands.registerCommand('')
-    // vscode.window.onDidChangeTerminalState(e => {
-    //     console.log(`Terminal state changed, name=${e ? e.name : 'undefined'}`);
-    // });
-    // // vscode.window.onDidStartTerminalShellExecution(e => {
-    // // 	console.log(`Terminal shell execution started, name=${e? e.name : 'undefined'}`);
-    // // });
-    // context.subscriptions.push(vscode.commands.registerCommand('extensionTerminalSample.create', () => {
-    //     new TerminalManager();
-    // }));
-
-    // context.subscriptions.push(vscode.commands.registerCommand('extensionTerminalSample.clear', () => {
-    // }));
-
-    // context.subscriptions.push(vscode.window.registerTerminalProfileProvider('wos.terminal', {
-    //     // @ts-ignore
-    //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    //     provideTerminalProfile (token) {
-    //         debugger;
-    // 	  	return {
-    //             name: 'WebOS',
-    //             pty: {},
-    //         };
-    //     }
-    // }));
-    new TerminalManager();
+    context.subscriptions.push(disposable);
 }

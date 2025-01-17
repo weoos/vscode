@@ -26,10 +26,11 @@
     "private": true,
     "version": "0.0.1",
     "scripts": {
-        "dev": "run-p build:fs build:terminal build:search _dev",
+        "dev": "run-p build:fs build:terminal build:search build:jsbox _dev",
         "build:fs": "vite build -m=ext_file-system",
         "build:terminal": "vite build -m=ext_terminal",
         "build:search": "vite build -m=ext_search",
+        "build:jsbox": "vite build -m=ext_jsbox",
         "_dev": "vite --host",
         "lint": "eslint --fix",
         "build": "vite build -m=build",
@@ -46,16 +47,17 @@
         "@vitejs/plugin-legacy": "^4.0.2",
         "dts-bundle-generator": "^9.5.1",
         "eslint": "^8.2.0",
+        "localforage": "^1.10.0",
         "npm-run-all": "^4.1.5",
         "terser": "^5.16.8",
         "typescript": "^4.9.3",
         "typescript-eslint": "0.0.1-alpha.0",
         "up-fs": "^0.0.1",
         "vite": "^4.2.0",
-        "vscode-web": "^1.91.1"
+        "vscode-web": "^1.91.1",
+        "web-term-ui": "^0.0.6"
     },
     "dependencies": {
-        "alien-signals": "^0.4.4",
         "history-stack": "^0.0.5"
     },
     "description": "",

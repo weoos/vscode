@@ -13,15 +13,15 @@
 		  "https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}"
 	  },
 	  "extensionEnabledApiProposals": {
-		"vscode.vscode-memfs": [
-		  "fileSearchProvider",
-		  "textSearchProvider"
+		"vscode.vscode-wosfs": [
+			"fileSearchProvider",
+			"textSearchProvider"
 		]
-	  }
+	}
 	},
 	"folderUri": {
-	  "scheme": "memfs",
-	  "path": "/folder"
+	  "scheme": "wosfs",
+	  "path": "/test"
 	},
 	"additionalBuiltinExtensions": [
 		{

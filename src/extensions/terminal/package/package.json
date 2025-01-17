@@ -16,11 +16,17 @@
 	"categories": [
 		"Other"
 	],
-	"activationEvents": [
-		"onStartupFinished"
+    "activationEvents": [
+		"onFileSystem:wosfs"
 	],
 	"browser": "./dist/bundle.min.js",
 	"contributes": {
+		"viewsWelcome": [
+		  {
+			"view": "terminal",
+			"contents": "Web Terminal is Loading..."
+		  }
+		],
 		"commands": [
 			{
 				"command": "extensionTerminalSample.create",

@@ -1,9 +1,9 @@
 {
-	"name": "vscode-web-wosfs",
-	"displayName": "vscode-web-wosfs",
-	"description": "An example usage of the extension fs API",
+	"name": "vscode-web-jsbox",
+	"displayName": "vscode-web-jsbox",
+	"description": "JsBox",
 	"version": "0.0.1",
-	"publisher": "vscode-web-wosfs",
+	"publisher": "vscode-web-jsbox",
 	"private": true,
 	"license": "MIT",
 	"repository": {
@@ -23,11 +23,24 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "wosfs.workspaceInit",
-				"title": "Open Directory as Workspace",
-				"category": "WebosFS"
+				"command": "JsBox.Run",
+				"title": "Run with JsBox",
+				"icon": "$(debug-start)",
+				"category": "JsBox"
 			}
-		]
+		],
+		"menus": {
+			"editor/title/run": [
+				{
+					"command": "JsBox.Run"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "JsBox.Run"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

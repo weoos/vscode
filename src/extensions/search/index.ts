@@ -8,15 +8,13 @@
 
 import * as vscode from 'vscode';
 
-debugger;
 export function activate (context: vscode.ExtensionContext) {
-    debugger;
     context.subscriptions.push(
         vscode.languages.registerWorkspaceSymbolProvider(new MySymbolProvider())
     );
 }
 
-class MySymbolProvider {
+class MySymbolProvider implements vscode.WorkspaceSymbolProvider {
     provideWorkspaceSymbols (query, token) {
         debugger;
         // 这里是实现符号查询的主要逻辑

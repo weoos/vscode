@@ -22,3 +22,18 @@ export function getMaxCommonHead (values: string[], start = 0) {
         index ++;
     }
 }
+
+export function randomId (head = '') {
+    return `${head}${Date.now().toString().substring(5)}-${Math.random().toString(16).substring(2)}`;
+}
+
+export function withResolve<T = any, Err = any> () {
+    let resolve!: (data?: T) => void;
+    let reject!: (Err?: Err) => void;
+    const ready = new Promise<T>((res, rej) => {
+        // @ts-ignore
+        resolve = res;
+        reject = rej;
+    });
+    return {ready, resolve, reject};
+}

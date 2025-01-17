@@ -17,7 +17,7 @@
 		"Other"
 	],
     "activationEvents": [
-		"onSearch:scheme"
+        "*"
 	],
 	"browser": "./dist/bundle.min.js",
 	"contributes": {

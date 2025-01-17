@@ -3,8 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// todo fix terminal修改文件 vscode 工作区不实时更新
+// todo fix 搜索无效问题
 
-import {require, ready} from '../../common/web-node';
+import {require, ready} from '../../common/web-node/dist';
 import * as vscode from 'vscode';
 
 
@@ -18,6 +20,15 @@ export class WebOSFS implements vscode.FileSystemProvider {
 
     constructor () {
         this.ready = ready;
+        this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+
+        // setTimeout(() => {
+        //     console.log('trigger change file');
+        //     this._onDidChangeFile.fire([{
+        //         type: vscode.FileChangeType.Created,
+        //         uri: vscode.Uri.parse('wosfs:/test/aa'),
+        //     } as vscode.FileChangeEvent]);
+        // }, 10000);
     }
 
     stat (uri: vscode.Uri): vscode.FileStat {
@@ -58,6 +69,7 @@ export class WebOSFS implements vscode.FileSystemProvider {
     readFile (uri: vscode.Uri): Uint8Array {
         try {
             const data = fs.readFileSync(uri.path);
+            console.log('watch readFile', new TextDecoder().decode(data));
             return data;
         } catch (e) {
             throw vscode.FileSystemError.FileNotFound();
@@ -118,18 +130,43 @@ export class WebOSFS implements vscode.FileSystemProvider {
         console.log('trigger copy file', source.path, destination.path);
         fs.copyFileSync(source.path, destination.path);
     }
+    
+    private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
+    get onDidChangeFile (): vscode.Event<vscode.FileChangeEvent[]> {
+        return this._onDidChangeFile.event;
+    }
 
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    watch (uri: vscode.Uri): vscode.Disposable {
-        // ignore, fires for all changes...
-        return new vscode.Disposable(() => { });
+    watch (uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
+        
+        console.log('watch listen', uri, options);
+        const watcher = fs.watch(uri.path, {recursive: options.recursive}, (event, filename) => {
+            console.log('watch', event, filename);
+
+            if (filename) {
+                const filepath = path.join(uri.path, filename);
+
+                // TODO support excludes (using minimatch library?);
+
+                let type = vscode.FileChangeType.Changed;
+                if (event !== 'change') {
+                    type = fs.existsSync(filepath) ? vscode.FileChangeType.Created : vscode.FileChangeType.Deleted;
+                }
+
+                this._onDidChangeFile.fire([{
+                    type,
+                    uri: uri.with({path: filepath})
+                } as vscode.FileChangeEvent]);
+            }
+        });
+
+        return {dispose: () => watcher.close()};
     }
 
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     private _bufferedEvents: vscode.FileChangeEvent[] = [];
     private _fireSoonHandle?: any;
-    readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
     private _fireSoon (...events: vscode.FileChangeEvent[]): void {
         this._bufferedEvents.push(...events);
 
