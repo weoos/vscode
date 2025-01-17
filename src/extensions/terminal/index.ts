@@ -5,13 +5,20 @@
  */
 'use strict';
 
-import {Messenger} from '../../common/messenger/messenger';
+import {Messenger, storage} from '../../common/messenger/messenger';
 import * as vscode from 'vscode';
 
 export async function activate (context: vscode.ExtensionContext) {
     const msg = new Messenger('term-ext');
-    const disposable = vscode.commands.registerCommand('workbench.action.terminal.clear', () => {
-        msg.emit('clear-terminal');
-    });
-    context.subscriptions.push(disposable);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('workbench.action.terminal.clear', () => {
+            msg.emit('clear-terminal');
+        })
+    );
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveColorTheme((event) => {
+            msg.emit('theme-change', event.kind === 1 ? 'light' : 'dark');
+        })
+    );
+    storage.setItem('initial-theme', vscode.window.activeColorTheme.kind === 1 ? 'light' : 'dark');
 }

@@ -10,6 +10,7 @@ const store = localforage.createInstance({
     name: 'vw-messenger',
     driver: localforage.INDEXEDDB,
 });
+export const storage = store;
 
 const MsgKey = 'vw-messenger';
 const MsgCheckInterval = 500;
@@ -17,6 +18,7 @@ const MsgCheckInterval = 500;
 export interface IMessageMap {
     'clear-terminal': null,
     'open-folder': {path: string, replace?: boolean},
+    'theme-change': 'light'|'dark',
 }
 
 export type IMsgKey = keyof IMessageMap;

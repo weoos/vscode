@@ -5,7 +5,7 @@
  */
 
 import {withResolve} from '../../common/utils';
-import {Messenger} from '../../common/messenger/messenger';
+import {Messenger, storage} from '../../common/messenger/messenger';
 import {WebOS} from './dist';
 
 export class Main {
@@ -22,11 +22,21 @@ export class Main {
 
         this.term.ready.then(() => {
             this.msg.on('clear-terminal', () => {
-                debugger;
                 this.os.term.clearTerminal();
             });
+            const initColor = (mode: any) => {
+                if (!mode) return;
+                this.os.term.setColor({color: mode === 'dark' ? '#fff' : '#000'});
+            };
+            this.msg.on('theme-change', mode => initColor(mode));
+            storage.getItem('initial-theme').then(mode => initColor(mode));
+            this.os.term.setColor({
+                background: 'transparent',
+            });
+            window.os = this.os;
         });
 
+        // @ts-ignore
         window.test = (path: string) => {
             this.msg.emit('open-folder', {path, replace: true});
         };
