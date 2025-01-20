@@ -5,11 +5,12 @@
  */
 
 import {withResolve} from '../../common/utils';
-import {Messenger, storage} from '../../common/messenger/messenger';
+import {storage} from '../../common/messenger/messenger';
 import {WebOS} from './dist';
+import {messenger} from '../message';
+import {CodeCommand} from './commnds/code';
 
 export class Main {
-    msg = new Messenger('main');
 
     term: MainTerminal;
 
@@ -21,25 +22,27 @@ export class Main {
         this.term = new MainTerminal();
 
         this.term.ready.then(() => {
-            this.msg.on('clear-terminal', () => {
+            messenger.on('clear-terminal', () => {
                 this.os.term.clearTerminal();
             });
             const initColor = (mode: any) => {
                 if (!mode) return;
-                this.os.term.setColor({color: mode === 'dark' ? '#fff' : '#000'});
+                const isDark = mode === 'dark';
+                this.os.term.setColor({
+                    color: isDark ? '#ccc' : '#444',
+                    selectionBackground: isDark ? '#ccc' : '#444',
+                    selectionColor: isDark ? '#444' : '#ccc',
+                });
             };
-            this.msg.on('theme-change', mode => initColor(mode));
+            messenger.on('theme-change', mode => initColor(mode));
             storage.getItem('initial-theme').then(mode => initColor(mode));
             this.os.term.setColor({
                 background: 'transparent',
             });
+            this.os.term.setFontSize(12);
             window.os = this.os;
-        });
 
-        // @ts-ignore
-        window.test = (path: string) => {
-            this.msg.emit('open-folder', {path, replace: true});
-        };
+        });
     }
 }
 
@@ -103,9 +106,18 @@ export class MainTerminal {
                 container.innerHTML = '';
                 container.style.padding = '5px';
                 this.os = new WebOS(container);
+                this.onInitialized();
                 this.resolve();
             }
         }
+    }
+
+    private onInitialized () {
+        this.initCommands();
+    }
+
+    private initCommands () {
+        this.os.registerCommand(CodeCommand);
     }
 }
 
