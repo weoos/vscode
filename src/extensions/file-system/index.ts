@@ -7,7 +7,7 @@
 
 import * as vscode from 'vscode';
 import {WebOSFS} from './file-system';
-import {Messenger} from '../../common/messenger/messenger';
+import {Messenger} from '../../common/messenger';
 
 // import {require} from '../../common/web-node/dist';
 const wosfs = new WebOSFS();
@@ -21,7 +21,7 @@ function openFolder (dirPath: string, replace = false) {
 
 export async function activate (context: vscode.ExtensionContext) {
 
-    const msg = new Messenger('fs-ext');
+    const msg = new Messenger({id: 'fs-ext'});
     msg.on('open-folder', ({path, replace}) => {
         openFolder(path, replace);
     });

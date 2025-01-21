@@ -54,10 +54,11 @@
         "typescript-eslint": "0.0.1-alpha.0",
         "up-fs": "^0.0.1",
         "vite": "^4.2.0",
-        "vscode-web": "^1.91.1",
-        "web-term-ui": "^0.0.6"
+        "vscode-web": "^1.91.1"
     },
     "dependencies": {
+        "@weoos/event": "^0.0.1",
+        "@weoos/os": "^0.0.1",
         "history-stack": "^0.0.5"
     },
     "description": "",

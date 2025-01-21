@@ -5,8 +5,8 @@
  */
 
 import {withResolve} from '../../common/utils';
-import {storage} from '../../common/messenger/messenger';
-import {WebOS} from './dist';
+import {storage} from '../../common/storage';
+import {WebOS} from '@weoos/os';
 import {messenger} from '../message';
 import {CodeCommand} from './commnds/code';
 

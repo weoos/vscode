@@ -5,11 +5,12 @@
  */
 'use strict';
 
-import {Messenger, storage} from '../../common/messenger/messenger';
+import {Messenger} from '../../common/messenger';
+import {storage} from '../../common/storage';
 import * as vscode from 'vscode';
 
 export async function activate (context: vscode.ExtensionContext) {
-    const msg = new Messenger('term-ext');
+    const msg = new Messenger({id: 'term-ext'});
     context.subscriptions.push(
         vscode.commands.registerCommand('workbench.action.terminal.clear', () => {
             msg.emit('clear-terminal');
