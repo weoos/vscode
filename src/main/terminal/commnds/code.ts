@@ -4,23 +4,22 @@
  * @Description: Coding something
  */
 import {messenger} from '../../message';
-import type {ICommand, ICommandInfo, Disk} from '../dist';
+import type {ICommand, ICommandInfo, Disk} from '@weoos/disk';
 
 export const CodeCommand: ICommand = {
     name: 'code',
     helpInfo: 'Open Folder With VsCode Web.',
-    run (cmd: ICommandInfo, options: {commands: ICommandInfo[]; disk: Disk; data: string;}): string {
+    async run (cmd: ICommandInfo, options: {commands: ICommandInfo[]; disk: Disk; data: string;}) {
         const path = cmd.args[0];
 
-        if (!options.disk.existSync(path)) {
+        if (!await options.disk.exist(path)) {
             return `Target "${path}" is not exists.`;
         }
-        if (!options.disk.isDir(path)) {
-            return `Target "${path}" is not Directory.`;
+        if (await options.disk.isDir(path)) {
+            messenger.emit('open-folder', {path, replace: true});
+        } else {
+            messenger.emit('open-file', path);
         }
-        
-        messenger.emit('open-folder', {path, replace: true});
-
         return '';
     }
 };

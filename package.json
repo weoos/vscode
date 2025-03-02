@@ -57,8 +57,9 @@
         "vscode-web": "^1.91.1"
     },
     "dependencies": {
-        "@weoos/event": "^0.0.1",
-        "@weoos/os": "^0.0.1",
+        "@weoos/disk": "^0.0.5",
+        "@weoos/event": "^0.0.5",
+        "@weoos/os": "^0.0.5",
         "history-stack": "^0.0.5"
     },
     "description": "",

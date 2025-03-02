@@ -40,8 +40,12 @@ export class Main {
                 background: 'transparent',
             });
             this.os.term.setFontSize(12);
+            // @ts-ignore
             window.os = this.os;
 
+            this.os.commandProvider.comm;
+
+            // todo 安装nodejs
         });
     }
 }
@@ -93,19 +97,17 @@ export class MainTerminal {
             return;
         }
     
-        const list = document.querySelectorAll('.welcome-view');
-    
+        const list = document.querySelectorAll('.integrated-terminal');
         if (list.length) {
             for (let i = 0; i < list.length; i++) {
-                const container = list[i] as HTMLElement & {__inited: boolean};
-                if (container.innerText !== 'Web Terminal is Loading...') continue;
+                const container = (list[i].firstChild) as HTMLElement & {__inited: boolean};
                 this.initialized = true;
                 container.addEventListener('wheel', e => {
                     e.stopPropagation();
                 });
                 container.innerHTML = '';
                 container.style.padding = '5px';
-                this.os = new WebOS(container);
+                this.os = new WebOS({container});
                 this.onInitialized();
                 this.resolve();
             }

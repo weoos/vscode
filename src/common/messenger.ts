@@ -9,6 +9,7 @@ import {WeoOSEvent} from '@weoos/event';
 export interface IMessageMap {
     'clear-terminal': null,
     'open-folder': {path: string, replace?: boolean},
+    'open-file': string,
     'theme-change': 'light'|'dark',
 }
 

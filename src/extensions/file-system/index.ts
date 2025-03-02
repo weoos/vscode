@@ -9,29 +9,42 @@ import * as vscode from 'vscode';
 import {WebOSFS} from './file-system';
 import {Messenger} from '../../common/messenger';
 
-// import {require} from '../../common/web-node/dist';
-const wosfs = new WebOSFS();
-// const fs = require('fs');
+function genePath (path: string) {
+    if (path[0] !== '/') path = `/${path}`;
+    return vscode.Uri.parse(`wosfs:/${path}`);
+}
 
 function openFolder (dirPath: string, replace = false) {
     vscode.workspace.updateWorkspaceFolders(0, replace ? 1 : 0, {
-        uri: vscode.Uri.parse(`wosfs:${dirPath}`),
+        uri: genePath(dirPath),
     });
 }
 
+async function openFile (filePath: string) {
+    // 打开文本文档
+    const document = await vscode.workspace.openTextDocument(genePath(filePath));
+    // 在编辑器中显示文档
+    await vscode.window.showTextDocument(document);
+}
+
+
 export async function activate (context: vscode.ExtensionContext) {
+
+    const wosfs = new WebOSFS();
 
     const msg = new Messenger({id: 'fs-ext'});
     msg.on('open-folder', ({path, replace}) => {
         openFolder(path, replace);
     });
-    await wosfs.ready;
+    msg.on('open-file', async (path) => {
+        openFile(path);
+    });
 
     console.log('WebOSFS says "Hello"');
 
     context.subscriptions.push(vscode.workspace.registerFileSystemProvider('wosfs', wosfs, {isCaseSensitive: true}));
 
-    openFolder('/test');
+    // openFolder('/test');
 
     context.subscriptions.push(vscode.commands.registerCommand('wosfs.workspaceInit', async () => {
         const dirPath = await vscode.window.showInputBox({
@@ -46,6 +59,18 @@ export async function activate (context: vscode.ExtensionContext) {
             }
         }
     }));
+
+    // await wosfs.ready;
+
+    // setTimeout(() => {
+    //     const uri = vscode.Uri.parse('wosfs:/test/1.txt');
+    //     wosfs.readFile(uri).then(content => {
+    //         debugger;
+    //         console.log('File content:', content);
+    //     }).catch(error => {
+    //         console.error('Error reading file:', error);
+    //     });
+    // }, 2000);
 
     // context.subscriptions.push(vscode.commands.registerCommand('wosfs.workspaceInit', _ => {
     //     vscode.workspace.updateWorkspaceFolders(0, 0, {uri: vscode.Uri.parse('wosfs:/'), name: 'wosfs - Sample'});

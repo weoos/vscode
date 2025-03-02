@@ -6,20 +6,18 @@
 // todo fix terminal修改文件 vscode 工作区不实时更新
 // todo fix 搜索无效问题
 
-import {require, ready} from '../../common/web-node/dist';
+import {Disk, path} from '@weoos/disk';
 import * as vscode from 'vscode';
 
-
-const path = require('path');
-const fs = require('fs');
-
-
 export class WebOSFS implements vscode.FileSystemProvider {
+
+    disk: Disk;
 
     ready: Promise<void>;
 
     constructor () {
-        this.ready = ready;
+        this.disk = new Disk();
+        this.ready = this.disk.ready;
         this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
 
         // setTimeout(() => {
@@ -30,9 +28,9 @@ export class WebOSFS implements vscode.FileSystemProvider {
         //     } as vscode.FileChangeEvent]);
         // }, 10000);
     }
-
-    stat (uri: vscode.Uri): vscode.FileStat {
-        const info = fs.statSync(uri.path);
+    async stat (uri: vscode.Uri): Promise<vscode.FileStat> {
+        await this.ready;
+        const info = await this.disk.stat(uri.path);
         // const {name} = splitPathInfo(uri.path);
 
         console.log(`stat: uri.path=${uri.path}`, uri, info);
@@ -51,24 +49,29 @@ export class WebOSFS implements vscode.FileSystemProvider {
     }
 
 
-    readDirectory (uri: vscode.Uri): [string, vscode.FileType][] {
-        const files = fs.readdirSync(uri.path);
+    async readDirectory (uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+        await this.ready;
+        const files = await this.disk.ls(uri.path);
+        if (!files) return [];
         console.log(`readDirectory uri.path=${uri.path}`, uri, files);
-        return files.map(name => {
-            const stat = fs.statSync(path.join(uri.path, name));
+        return Promise.all(files.map(async name => {
+            const stat = await this.disk.stat(path.join(uri.path, name));
             const isDir = stat.isDirectory();
             return [
                 name,
                 isDir ? vscode.FileType.Directory : vscode.FileType.File,
             ];
-        });
+        }));
     }
 
     // --- manage file contents
 
-    readFile (uri: vscode.Uri): Uint8Array {
+    async readFile (uri: vscode.Uri): Promise<Uint8Array> {
+        console.log('read ----', uri);
+        await this.ready;
         try {
-            const data = fs.readFileSync(uri.path);
+            const data = await this.disk.read(uri.path);
+            if (!data) return new Uint8Array();
             console.log('watch readFile', new TextDecoder().decode(data));
             return data;
         } catch (e) {
@@ -76,11 +79,12 @@ export class WebOSFS implements vscode.FileSystemProvider {
         }
     }
 
-    writeFile (uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): void {
+    async writeFile (uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+        await this.ready;
         console.log('trigger write file', uri.path);
 
         const path = uri.path;
-        const exist = fs.existsSync(path);
+        const exist = await this.disk.exist(path);
 
         if (!exist && !options.create) {
             throw vscode.FileSystemError.FileNotFound(uri);
@@ -88,47 +92,51 @@ export class WebOSFS implements vscode.FileSystemProvider {
         if (exist && options.create && !options.overwrite) {
             throw vscode.FileSystemError.FileExists(uri);
         }
-        fs.writeFileSync(path, content);
+        await this.disk.write(path, content);
 
         this._fireSoon({type: vscode.FileChangeType.Changed, uri});
     }
 
     // --- manage files/folders
 
-    rename (oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): void {
+    async rename (oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): Promise<void> {
+        await this.ready;
         console.log('trigger rename file');
-        if (!options.overwrite && fs.existsSync(newUri.path)) {
+        if (!options.overwrite && await this.disk.exist(newUri.path)) {
             throw vscode.FileSystemError.FileExists(newUri);
         }
-        fs.renameSync(oldUri.path, newUri.path);
+        await this.disk.move(oldUri.path, newUri.path);
         this._fireSoon(
             {type: vscode.FileChangeType.Deleted, uri: oldUri},
             {type: vscode.FileChangeType.Created, uri: newUri}
         );
     }
 
-    delete (uri: vscode.Uri): void {
+    async delete (uri: vscode.Uri): Promise<void> {
+        await this.ready;
         console.log('trigger delete file');
         const dirname = uri.with({path: path.dirname(uri.path)});
         const uriPath = uri.path;
-        if (!fs.existsSync(uriPath)) {
+        if (!await this.disk.exist(uriPath)) {
             throw vscode.FileSystemError.FileNotFound(uri);
         }
-        fs.rmSync(uriPath);
+        await this.disk.remove(uriPath);
         this._fireSoon({type: vscode.FileChangeType.Changed, uri: dirname}, {uri, type: vscode.FileChangeType.Deleted});
     }
 
-    createDirectory (uri: vscode.Uri): void {
+    async createDirectory (uri: vscode.Uri): Promise<void> {
+        await this.ready;
         const dirname = uri.with({path: path.dirname(uri.path)});
         const uriPath = uri.path;
-        fs.mkdirSync(uriPath);
+        await this.disk.createDir(uriPath);
         this._fireSoon({type: vscode.FileChangeType.Changed, uri: dirname}, {type: vscode.FileChangeType.Created, uri});
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    copy (source: vscode.Uri, destination: vscode.Uri, options: { readonly overwrite: boolean; }): void {
+    async copy (source: vscode.Uri, destination: vscode.Uri, options: { readonly overwrite: boolean; }): Promise<void> {
+        await this.ready;
         console.log('trigger copy file', source.path, destination.path);
-        fs.copyFileSync(source.path, destination.path);
+        await this.disk.copySingle(source.path, destination.path);
     }
     
     private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
@@ -141,17 +149,18 @@ export class WebOSFS implements vscode.FileSystemProvider {
     watch (uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
         
         console.log('watch listen', uri, options);
-        const watcher = fs.watch(uri.path, {recursive: options.recursive}, (event, filename) => {
+        const watcher = this.disk.watch(uri.path, {recursive: options.recursive}, async (event, filename) => {
+            await this.ready;
             console.log('watch', event, filename);
 
             if (filename) {
-                const filepath = path.join(uri.path, filename);
+                const filepath = path.join(uri.path, filename as string);
 
                 // TODO support excludes (using minimatch library?);
 
                 let type = vscode.FileChangeType.Changed;
                 if (event !== 'change') {
-                    type = fs.existsSync(filepath) ? vscode.FileChangeType.Created : vscode.FileChangeType.Deleted;
+                    type = await this.disk.exist(filepath) ? vscode.FileChangeType.Created : vscode.FileChangeType.Deleted;
                 }
 
                 this._onDidChangeFile.fire([{

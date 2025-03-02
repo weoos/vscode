@@ -13,6 +13,10 @@
 			"https://openvsxorg.blob.core.windows.net/resources/{publisher}/{name}/{version}/{path}"
 		}
 	},
+	"folderUri": {
+	  "scheme": "wosfs",
+	  "path": "/test"
+	},
 	"additionalBuiltinExtensions": [
 		{
 			"scheme": "http",

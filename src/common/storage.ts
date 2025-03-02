@@ -11,3 +11,4 @@ const store = localforage.createInstance({
     driver: localforage.INDEXEDDB,
 });
 export const storage = store;
+
