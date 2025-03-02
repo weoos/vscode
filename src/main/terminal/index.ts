@@ -43,8 +43,6 @@ export class Main {
             // @ts-ignore
             window.os = this.os;
 
-            this.os.commandProvider.comm;
-
             // todo 安装nodejs
         });
     }

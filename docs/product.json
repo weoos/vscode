@@ -20,19 +20,19 @@
 	"additionalBuiltinExtensions": [
 		{
 			"scheme": "http",
-			"path": "/src/extensions/terminal/package"
+			"path": "/vscode/src/extensions/terminal/package"
 		},
 		{
 			"scheme": "http",
-			"path": "/src/extensions/file-system/package"
+			"path": "/vscode/src/extensions/file-system/package"
 		},
 		{
 			"scheme": "http",
-			"path": "/src/extensions/search/package"
+			"path": "/vscode/src/extensions/search/package"
 		},
 		{
 			"scheme": "http",
-			"path": "/src/extensions/jsbox/package"
+			"path": "/vscode/src/extensions/jsbox/package"
 		}
 	]
   }

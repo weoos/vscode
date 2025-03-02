@@ -1,0 +1,57 @@
+{
+	"name": "vscode-web-terminal",
+	"displayName": "vscode-web-terminal",
+	"description": "An example usage of the extension terminal API",
+	"version": "0.0.1",
+	"publisher": "vscode-web-terminal",
+	"private": true,
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-extension-samples"
+	},
+	"engines": {
+		"vscode": "^1.73.0"
+	},
+	"categories": [
+		"Other"
+	],
+    "activationEvents": [
+		"onFileSystem:wosfs"
+	],
+	"browser": "./dist/bundle.min.js",
+	"contributes": {
+		"viewsWelcome": [
+		  {
+			"view": "terminal",
+			"contents": "Web Terminal is Loading..."
+		  }
+		],
+		"commands": [
+			{
+				"command": "extensionTerminalSample.create",
+				"title": "Extension Terminal Sample: Create"
+			},
+			{
+				"command": "extensionTerminalSample.clear",
+				"title": "Extension Terminal Sample: Clear"
+			}
+		],
+		"terminal": {
+			"profiles": [
+			  {
+				"title": "Profile from extension",
+				"id": "webos.terminal"
+			  }
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"lint": "eslint \"src/**/*.ts\""
+	},
+	"devDependencies": {
+	}
+}

@@ -5,3 +5,4 @@ npm
 docs
 *.min.js
 dist
+public
