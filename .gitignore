@@ -1,6 +1,6 @@
 pnpm-debug.log*
 node_modules
-dist
+/dist
 npm
 packages
 .DS_Store
