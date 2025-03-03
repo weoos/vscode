@@ -4,7 +4,8 @@ node_modules
 npm
 packages
 .DS_Store
-*.min.js
+/src/**/*.min.js
 
 vscode-web
 vscw
+test

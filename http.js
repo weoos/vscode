@@ -6,7 +6,7 @@
 const express = require('express');
 const serveStatic = require('serve-static');
 
-const staticBasePath = './docs';
+const staticBasePath = '../vscode';
  
 const app = express();
  
