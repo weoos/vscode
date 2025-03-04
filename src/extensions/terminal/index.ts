@@ -12,7 +12,8 @@ import * as vscode from 'vscode';
 export async function activate (context: vscode.ExtensionContext) {
     let isThemeSet = false;
     const value = await storage.getItem('set-theme');
-    console.log('set-theme', value);
+    // console.log('set-theme', value);
+    // console.log('theme kind', vscode.window.activeColorTheme.kind);
     if (value) {
         isThemeSet = true;
     } else {
@@ -38,5 +39,5 @@ export async function activate (context: vscode.ExtensionContext) {
             msg.emit('theme-change', event.kind === 1 ? 'light' : 'dark');
         })
     );
-    storage.setItem('initial-theme', vscode.window.activeColorTheme.kind === 1 ? 'light' : 'dark');
+    await storage.setItem('initial-theme', vscode.window.activeColorTheme.kind === 1 ? 'light' : 'dark');
 }

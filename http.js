@@ -11,5 +11,6 @@ const staticBasePath = '../vscode';
 const app = express();
  
 app.use(serveStatic(staticBasePath));
-app.listen(5173);
-console.log('Listening on port 8080');
+const port = 5173;
+app.listen(port);
+console.log(`Listening on port ${port}`);

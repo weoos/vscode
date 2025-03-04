@@ -18,21 +18,25 @@
 	  "path": "/hello"
 	},
 	"additionalBuiltinExtensions": [
-		{
-			"scheme": "http",
-			"path": "/src/extensions/file-system/package"
+        {
+			"scheme": "https",
+			"authority": "weoos.github.io",
+			"path": "/vscode/src/extensions/terminal/package"
 		},
 		{
-			"scheme": "http",
-			"path": "/src/extensions/terminal/package"
+			"scheme": "https",
+			"authority": "weoos.github.io",
+			"path": "/vscode/src/extensions/file-system/package"
 		},
 		{
-			"scheme": "http",
-			"path": "/src/extensions/search/package"
+			"scheme": "https",
+			"authority": "weoos.github.io",
+			"path": "/vscode/src/extensions/search/package"
 		},
 		{
-			"scheme": "http",
-			"path": "/src/extensions/jsbox/package"
+			"scheme": "https",
+			"authority": "weoos.github.io",
+			"path": "/vscode/src/extensions/jsbox/package"
 		}
 	]
   }

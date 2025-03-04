@@ -34,7 +34,10 @@ export class Main {
                     selectionColor: isDark ? '#444' : '#ccc',
                 });
             };
-            messenger.on('theme-change', mode => initColor(mode));
+            messenger.on('theme-change', mode => {
+                console.log(`terminal init color ${mode}`);
+                initColor(mode);
+            });
             storage.getItem('initial-theme').then(mode => initColor(mode));
             this.os.term.setColor({
                 background: 'transparent',
